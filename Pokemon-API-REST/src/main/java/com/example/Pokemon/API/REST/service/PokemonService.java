@@ -1,5 +1,6 @@
 package com.example.Pokemon.API.REST.service;
 
+import com.example.Pokemon.API.REST.exception.ResourceNotFoundException;
 import com.example.Pokemon.API.REST.model.Pokemon;
 import com.example.Pokemon.API.REST.repository.PokemonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,10 @@ public class PokemonService {
     }
 
     public Pokemon obtenerPokemonId(Long id) {
+
+        if (!pokemonRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Pokemon no encontrado, ID: " + id);
+        }
         return pokemonRepository.findById(id).orElse(null);
     }
 
@@ -26,8 +31,10 @@ public class PokemonService {
     }
 
     public Pokemon actualizarCompleto(Long id, Pokemon pokemonActualizado) {
+        if (!pokemonRepository.existsById(id)) {
+            throw new ResourceNotFoundException("No se puede actualizar, pokemon no encontrado, ID: " + id);
+        }
         Pokemon pokemonExistente = obtenerPokemonId(id);
-        if (pokemonExistente != null) {
             pokemonExistente.setNombre(pokemonActualizado.getNombre());
             pokemonExistente.setTipo(pokemonActualizado.getTipo());
             pokemonExistente.setNivel(pokemonActualizado.getNivel());
@@ -36,8 +43,7 @@ public class PokemonService {
             pokemonExistente.setDescripcion(pokemonActualizado.getDescripcion());
             pokemonExistente.setImagenUrl(pokemonActualizado.getImagenUrl());
             return pokemonRepository.save(pokemonExistente);
-        }
-        return null;
+
     }
 
     public Pokemon actualizarParcial(Long id, Pokemon pokemonParcial) {
@@ -69,11 +75,10 @@ public class PokemonService {
         return null;
     }
 
-    public boolean eliminar(Long id) {
-        if (pokemonRepository.existsById(id)) {
-            pokemonRepository.deleteById(id);
-            return true;
+    public void eliminar(Long id) {
+        if (!pokemonRepository.existsById(id)) {
+            throw new ResourceNotFoundException("No se puede eliminar, pokemon no encontrado, ID: " + id);
         }
-        return false;
+        pokemonRepository.deleteById(id);
     }
 }

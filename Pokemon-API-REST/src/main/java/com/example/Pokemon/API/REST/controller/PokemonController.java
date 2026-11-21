@@ -2,6 +2,7 @@ package com.example.Pokemon.API.REST.controller;
 
 import com.example.Pokemon.API.REST.model.Pokemon;
 import com.example.Pokemon.API.REST.service.PokemonService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +15,11 @@ public class PokemonController {
     @Autowired
     private PokemonService pokemonService;
 
+    @Autowired
+    public PokemonController(PokemonService pokemonService){
+        this.pokemonService = pokemonService;
+    }
+
     @GetMapping
     public List<Pokemon> obtenerTodos() {
         return pokemonService.obtenerPokemones();
@@ -25,12 +31,12 @@ public class PokemonController {
     }
 
     @PostMapping
-    public Pokemon crear(@RequestBody Pokemon pokemon) {
+    public Pokemon crear(@Valid @RequestBody Pokemon pokemon) {
         return pokemonService.crear(pokemon);
     }
 
     @PutMapping("/{id}")
-    public Pokemon actualizarCompleto(@PathVariable Long id, @RequestBody Pokemon pokemon) {
+    public Pokemon actualizarCompleto(@PathVariable Long id, @Valid @RequestBody Pokemon pokemon) {
         if (pokemonService.obtenerPokemonId(id) != null) {
             return pokemonService.actualizarCompleto(id, pokemon);
         }
