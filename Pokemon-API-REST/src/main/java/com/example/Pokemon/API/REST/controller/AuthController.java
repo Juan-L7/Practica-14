@@ -1,0 +1,46 @@
+package com.example.Pokemon.API.REST.controller;
+
+import com.example.Pokemon.API.REST.dto.LoginRequest;
+import com.example.Pokemon.API.REST.dto.LoginResponse;
+import com.example.Pokemon.API.REST.model.User;
+import com.example.Pokemon.API.REST.repository.UserRepository;
+import com.example.Pokemon.API.REST.service.JwtService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private JwtService jwtService;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request){
+        User user = userRepository.findByEmail(request.getEmail());
+
+        if(user == null){
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "credenciales invalidas"));
+
+        }
+
+        if(!user.getPassword().equals(request.getPassword())){
+            return ResponseEntity
+                    .status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "credenciales invalidas"));
+        }
+
+        String token = jwtService.generateToken(user.getEmail(), user.getRole());
+
+        return ResponseEntity.ok(new LoginResponse(token));
+    }
+}
